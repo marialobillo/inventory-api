@@ -1,0 +1,13 @@
+pyproject.toml
+app/__init__.py
+app/api.py
+app/domain.py
+app/errors.py
+app/main.py
+app/repo.py
+fastapi_inventory.egg-info/PKG-INFO
+fastapi_inventory.egg-info/SOURCES.txt
+fastapi_inventory.egg-info/dependency_links.txt
+fastapi_inventory.egg-info/requires.txt
+fastapi_inventory.egg-info/top_level.txt
+tests/test_products.py
