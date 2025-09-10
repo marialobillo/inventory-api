@@ -29,6 +29,14 @@ def create_app() -> FastAPI:
     @app.get("/health")
     async def health():
         return {"ok": True}
+    
+    @app.get("/debug-env")
+    def debug_environment():
+        import os
+        return {
+            "DATABASE_URL": os.getenv("DATABASE_URL", "NOT_SET")[:50] + "..." if os.getenv("DATABASE_URL") else "NOT_SET",
+            "ENV": os.getenv("ENV", "NOT_SET")
+        }
 
     return app
 

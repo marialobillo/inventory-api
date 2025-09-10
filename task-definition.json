@@ -5,6 +5,7 @@
   "cpu": "256",
   "memory": "512",
   "executionRoleArn": "arn:aws:iam::495599749778:role/ecsTaskExecutionRole",
+  "enableExecuteCommand": true,
   "containerDefinitions": [
     {
       "name": "fastapi-app",
@@ -18,7 +19,7 @@
       "environment": [
         {
           "name": "DATABASE_URL",
-          "value": "postgresql://postgres:your-secure-password@fastapi-db.crkqcsiy2t1q.eu-west-3.rds.amazonaws.com:5432/postgres"
+          "value": "postgresql://postgres:mypassword123@fastapi-db.crkqcsiy2t1q.eu-west-3.rds.amazonaws.com:5432/postgres"
         },
         {
           "name": "ENV",
