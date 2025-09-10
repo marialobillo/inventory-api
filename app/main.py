@@ -2,16 +2,13 @@ from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from fastapi.exceptions import RequestValidationError
 from .api import build_products_router
-from .repo import InMemoryProductRepository
 from .errors import AlreadyExists, NotFound
 
 def create_app() -> FastAPI:
     app = FastAPI(title="Inventory API (FastAPI)")
 
-    # Excepciones uniformes
     @app.exception_handler(RequestValidationError)
     async def handle_validation(_req: Request, exc: RequestValidationError):
-        # Pydantic v2 -> error list
         details = []
         for e in exc.errors():
             msg = e.get("msg")
@@ -27,8 +24,7 @@ def create_app() -> FastAPI:
     async def handle_notfound(_req: Request, _exc: NotFound):
         return JSONResponse(status_code=404, content={"error": "NotFound"})
 
-    repo = InMemoryProductRepository()
-    app.include_router(build_products_router(repo))
+    app.include_router(build_products_router())
 
     @app.get("/health")
     async def health():

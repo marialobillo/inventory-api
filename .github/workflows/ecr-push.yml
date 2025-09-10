@@ -1,0 +1,46 @@
+name: Build and Push to ECR
+
+on:
+  push:
+    branches: [ "main" ]
+
+permissions:
+  id-token: write   # OIDC
+  contents: read
+
+env:
+  AWS_REGION: eu-west-1
+  ECR_REPOSITORY: fastapi-inventory
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure AWS Credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ${{ env.AWS_REGION }}
+          role-to-assume: arn:aws:iam::<ACCOUNT_ID>:role/<TU_ROLE_GITHUB_OIDC>
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Extract metadata (tags)
+        id: meta
+        run: |
+          echo "sha_short=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+          echo "image_tag=${GITHUB_SHA::7}" >> $GITHUB_OUTPUT
+
+      - name: Build, tag, and push image
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        run: |
+          docker build -t $ECR_REPOSITORY:${{ steps.meta.outputs.image_tag }} -t $ECR_REPOSITORY:latest .
+          docker tag $ECR_REPOSITORY:${{ steps.meta.outputs.image_tag }} $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.meta.outputs.image_tag }}
+          docker tag $ECR_REPOSITORY:latest $ECR_REGISTRY/$ECR_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.meta.outputs.image_tag }}
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY:latest

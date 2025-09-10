@@ -5,7 +5,7 @@ from .domain import Product, ProductUpdate
 class ProductRepository:
     async def add(self, p: Product) -> None: ...
     async def get(self, id: UUID) -> Optional[Product]: ...
-    async def list(self) -> List[Product]: ...
+    async def list(self, limit: int | None = None, offset: int = 0, q: str | None = None) -> List[Product]: ...
     async def update_partial(self, id: UUID, patch: ProductUpdate) -> Optional[Product]: ...
     async def delete(self, id: UUID) -> bool: ...
 
@@ -19,16 +19,25 @@ class InMemoryProductRepository(ProductRepository):
     async def get(self, id: UUID) -> Optional[Product]:
         return self.store.get(id)
 
-    async def list(self) -> List[Product]:
-        return list(self.store.values())
+    async def list(self, limit: int | None = None, offset: int = 0, q: str | None = None) -> List[Product]:
+        items = list(self.store.values())
+        if q:
+            ql = q.lower()
+            items = [p for p in items if ql in p.name.lower()]
+        # orden simple por nombre para estabilidad (o por id)
+        items.sort(key=lambda p: p.name.lower())
+        if offset:
+            items = items[offset:]
+        if limit is not None:
+            items = items[:limit]
+        return items
 
     async def update_partial(self, id: UUID, patch: ProductUpdate) -> Optional[Product]:
         cur = self.store.get(id)
         if not cur:
             return None
         data = cur.model_dump()
-        patch_data = {k: v for k, v in patch.model_dump(exclude_unset=True).items() if v is not None}
-        data.update(patch_data)
+        data.update({k: v for k, v in patch.model_dump(exclude_unset=True).items() if v is not None})
         updated = Product(**data)
         self.store[id] = updated
         return updated
