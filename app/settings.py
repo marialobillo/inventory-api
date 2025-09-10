@@ -1,12 +1,15 @@
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
-  ENV: str = "dev"
-  DATABASE_URL: str = "sqlite+aiosqlite:///./dev.db"
-  SQL_ECHO: bool = False
+    model_config = SettingsConfigDict(env_file='.env', extra='ignore')
 
-  class Config:
-    env_file = ".env"
-    extra = "ignore"
+    ENV: str = 'dev'
+    DATABASE_URL: str = ''    
+    SQL_ECHO: bool = False
 
-settings = Settings()
+    def ensure(self) -> 'Settings':
+        if not self.DATABASE_URL:
+            raise RuntimeError('DATABASE_URL environment variable is required')
+        return self
+
+settings = Settings().ensure()

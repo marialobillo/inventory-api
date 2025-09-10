@@ -15,6 +15,16 @@
           "protocol": "tcp"
         }
       ],
+      "environment": [
+        {
+          "name": "DATABASE_URL",
+          "value": "postgresql://postgres:your-secure-password@fastapi-db.crkqcsiy2t1q.eu-west-3.rds.amazonaws.com:5432/postgres"
+        },
+        {
+          "name": "ENV",
+          "value": "production"
+        }
+      ],
       "essential": true,
       "logConfiguration": {
         "logDriver": "awslogs",
